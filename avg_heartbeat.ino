@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include "MAX30105.h"
 #include "MovingAverage.h"
+#include <math.h>
 
 MAX30105 particleSensor;
 
@@ -17,8 +18,10 @@ long lastBeat = 0; //Time at which the last beat occurred
 
 float beatsPerMinute;
 int beatAvg;
-
-
+double bpm;
+double past_values[10];
+uint8_t x=0;
+  
 void setup()
 {
   Serial.begin(115200);
@@ -74,18 +77,44 @@ void loop()
   //Serial.print(", BPM=");
   //Serial.print(beatsPerMinute);
   //Serial.print("Avg BPM=");
-  Serial.println(average.update( beatAvg ));
+  
+  bpm = average.update( beatAvg );
+  //Serial.println(bpm);
+  if(x<10){
+    past_values[x]=bpm;
+    x++;
+    //if 10 past values are the same print the value
+    if(past_values[0]==past_values[1] && past_values[1]==past_values[2] && past_values[2]==past_values[3] && past_values[3]==past_values[4] && past_values[4]==past_values[5] && past_values[5]==past_values[6] && past_values[6]==past_values[7])
+    {
+      Serial.println("");
+      Serial.println("");
+      Serial.println("");
+      Serial.println("");
+      Serial.print("THIS IS THE BPM VALUE:   ");
+      Serial.println(past_values[0]);
+    }
+    }
+  //flush values after 10 iterations
+  if(x==10){
+    x=0;
+    for(int i=0;i<10;i++){
+      Serial.print("Value ");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.print(past_values[i]);
+      Serial.print(" ");
+      past_values[i]=0;
+    }
+    Serial.println(" ");
+  }
+  
   //Serial.println( average.update( particleSensor.getIR() ) );
   //Serial.println(beatsPerMinute);
   //Serial.print("Average hearbeat ");
   //Serial.print(beatAvg);
   //Serial.print(irValue);
+
     
-      //x = 0;   
-    //if(x-5 < x && x+5 < x){
-    //Serial.print("Peak Detection Value: ");
-    //Serial.println(x);
-   // }
   //if (irValue < 50000)
    // Serial.print(" No Grace, no life?");
   //Serial.println();
